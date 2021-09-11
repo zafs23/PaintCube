@@ -22,8 +22,7 @@ class ModelTests(TestCase):
         """test the email for a new user is normalized"""
         email = 'test@SAJIAZAFREEN.COM'
         user = get_user_model().objects.create_user(email, 'test123')
-        # here we do not need the actual password as we have already tested
-        # that
+        # here we do not need the actual password as we already tested that
 
         self.assertEqual(user.email, email.lower())
         # this makes the string lower case

@@ -42,7 +42,7 @@ class AdminSiteTests(TestCase):  # inherited from test cases
         # /admin/core/user/id - the reverse will make this urls
         res = self.client.get(url)
 
-        self.assertEqual(res.status_code, 200)# status code for response from
+        self.assertEqual(res.status_code, 200)  # status code for response from
         # the client is HTTP 200
 
     def test_create_user_page(self):

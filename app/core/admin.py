@@ -12,9 +12,9 @@ class UserAdmin(BaseUserAdmin):  # extend baseuseradmin
     ordering = ['id']
     list_display = ['email', 'name']
     fieldsets = (
-        (None, {'fields': ('email', 'password')}), # first field is titlte of
+        (None, {'fields': ('email', 'password')}),  # first field is titlte of
         # the section
-        (_('Personal Info'), {'fields': ('name',)}), # create personal info
+        (_('Personal Info'), {'fields': ('name',)}),  # create personal info
         (
             _('Permissions'),
             {'fields': ('is_active', 'is_staff', 'is_superuser')}
@@ -23,11 +23,11 @@ class UserAdmin(BaseUserAdmin):  # extend baseuseradmin
     )
     # edit the field sets for the add user page
     add_fieldsets = (
-        (None, { # {} means opening a dictionary here
-            'classes': ('wide',), # classes assigned to the form, default is
+        (None, {  # {} means opening a dictionary here
+            'classes': ('wide',),  # classes assigned to the form, default is
             # wide class
             'fields': ('email', 'password1', 'password2')
-        }), # the ',' should be here, otherwise python would consider as object
+        }),  # the ',' should be here,otherwise python would consider as object
     )
 
 

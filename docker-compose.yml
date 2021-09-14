@@ -11,4 +11,29 @@ services:
     volumes:
       - ./app:/app
     command: >
-      sh -c "python manage.py runserver 0.0.0.0:8000"
+      sh -c "python manage.py wait_for_db &&
+             python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+    environment:
+      - DB_HOST=db # is the name of the service that runs the databse
+      - DB_NAME=app # should be the postgre DB which is the app from below
+      - DB_USER=postgres # this is the user name
+      - DB_PASS=supersecretpassowrd
+    # here we add the depends, which can be set in different way
+    # here we want the app to depend of the database service
+    depends_on:
+      - db
+    # here we want the databse service to start before the app
+    #service and the database service will be available via the network when we
+    # use the hostname DB
+
+  db:
+    image: postgres:10-alpine
+    # environment variables
+    environment:
+      - POSTGRES_DB=app
+      - POSTGRES_PASSWORD=supersecretpassowrd # this password will be overriden
+      # by encrypted environment variable by the deployment tool like jenkins
+      # or travis, also this should never include any real password because
+      # ifsees the code can access it
+      # this password will be used for run the server locally

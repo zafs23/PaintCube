@@ -26,6 +26,18 @@ class UserSerializer(serializers.ModelSerializer):
         # the validated data will contain all data that was passed into the
         # the serializer(JSON data) and we will use that to create our user
 
+    def update(self, instance, validated_data):
+        """update a user, setting the password correctly, and return it"""
+        # remove the password from the dictionary
+        password = validated_data.pop('password', None)
+        user = super().update(instance, validated_data)
+
+        if password:
+            user.set_password(password)
+            user.save()
+
+        return user
+
 
 # new serializer based off the Django standard serializer
 class AuthTokenSerializer(serializers.Serializer):

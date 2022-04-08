@@ -68,3 +68,21 @@ class PrivateCategoriesApiTests(TestCase):
         # as we have created just category it will return 1
         self.assertEqual(res.data[0]['name'], category.name)  # test correct
         # name
+
+    def test_create_category_successful(self):
+        """Test creating a new category successfully"""
+        payload = {'name': 'Test category'}
+        self.client.post(CATEGORIES_URL, payload)
+
+        exists = Category.objects.filter(
+            user=self.user,
+            name=payload['name']
+        ).exists()
+        self.assertTrue(exists)  # test would fail if exists doesnt exist
+
+    def test_create_category_invalid(self):
+        """Test creating a new category with invalid payload"""
+        payload = {'name': ''}  # if a blank category that will be invalid
+        res = self.client.post(CATEGORIES_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)

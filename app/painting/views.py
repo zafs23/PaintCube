@@ -7,7 +7,9 @@ from core.models import Category
 from painting import serializers
 
 
-class CategoryViewSet(viewsets.GenericViewSet, mixins.ListModelMixin):
+class CategoryViewSet(viewsets.GenericViewSet,
+                      mixins.ListModelMixin,
+                      mixins.CreateModelMixin):
     """Manage category in the database"""
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
@@ -17,5 +19,9 @@ class CategoryViewSet(viewsets.GenericViewSet, mixins.ListModelMixin):
     def get_queryset(self):  # any filtering can be applied here
         """Return objects for the current authenticated user only"""
         return self.queryset.filter(user=self.request.user).order_by('-name')
+
+    def perform_create(self, serializer):
+        """Create a new category"""
+        serializer.save(user=self.request.user)
 # Create your views here.
 # going to use list model fuction from the rest rest_framework

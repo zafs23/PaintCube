@@ -70,3 +70,21 @@ class PrivateSuppliesApiTests(TestCase):
         # as we have mentioned just 1 supply it will return 1
         self.assertEqual(res.data[0]['name'], supply.name)  # test correct
         # name
+
+    def test_create_supply_successful(self):
+        """Test creating a new supply successfully"""
+        payload = {'name': 'Test supply'}
+        self.client.post(SUPPLIES_URL, payload)
+
+        exists = Supply.objects.filter(
+            user=self.user,
+            name=payload['name']
+        ).exists()
+        self.assertTrue(exists)  # test would fail if exists doesnt exist
+
+    def test_create_supply_invalid(self):
+        """Test creating a new supply with invalid payload"""
+        payload = {'name': ''}  # if a blank category that will be invalid
+        res = self.client.post(SUPPLIES_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)

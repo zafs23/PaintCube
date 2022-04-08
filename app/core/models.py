@@ -60,11 +60,11 @@ class Category(models.Model):
 
 
 class Supply(models.Model):
-    """Supply to be used in a recipe"""
+    """Supply to be used in a painting"""
     name = models.CharField(max_length=255)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
     )
 
     def __str__(self):

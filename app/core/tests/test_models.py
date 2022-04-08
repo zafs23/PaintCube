@@ -3,6 +3,14 @@ from django.test import TestCase
 # not recommended to use the get user model directly
 from django.contrib.auth import get_user_model
 
+from core import models
+
+
+# helper fucntion to test the user model
+def sample_user(email='test@sajiazafreen.com', password='testpass'):
+    """create a sample user"""
+    return get_user_model().objects.create_user(email, password)
+
 
 class ModelTests(TestCase):
 
@@ -44,3 +52,14 @@ class ModelTests(TestCase):
 
         self.assertTrue(user.is_superuser)
         self.assertTrue(user.is_staff)
+
+    def test_painting_category_str(self):
+        # test by creating a sample tag for a painting and test that that the
+        # string created from the tag gives the correct tage name
+        """Test the painting category's string representation"""
+        category = models.Category.objects.create(
+            user=sample_user(),
+            name='Watercolor'
+        )
+
+        self.assertEqual(str(category), category.name)

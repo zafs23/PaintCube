@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, \
                                         PermissionsMixin
+from django.conf import settings
 
 
 class UserManager(BaseUserManager):
@@ -42,5 +43,20 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
+
+
+class Category(models.Model):
+    """Category of a painting """
+    name = models.CharField(max_length=255)
+    user = models.ForeignKey(  # foreign key of the user object which could be
+        # done by refereing to the user but we here we used the better approach
+        settings.AUTH_USER_MODEL,  # used from the settings imported on top
+        on_delete=models.CASCADE,  # if the user is deleted the category will
+        # be deleted as well
+    )
+
+    def __str__(self):  # retrun the string representation
+        return self.name
+
 
 # Create your models here.

@@ -53,7 +53,7 @@ class ModelTests(TestCase):
         self.assertTrue(user.is_superuser)
         self.assertTrue(user.is_staff)
 
-    def test_painting_category_str(self):
+    def test_category_str(self):
         # test by creating a sample tag for a painting and test that that the
         # string created from the tag gives the correct tage name
         """Test the painting category's string representation"""
@@ -63,3 +63,12 @@ class ModelTests(TestCase):
         )
 
         self.assertEqual(str(category), category.name)
+
+    def test_supply_str(self):
+        """Test the string respresentation painting suppply used """
+        supply = models.Supply.objects.create(
+            user=sample_user(),
+            name='Paint Brush'
+        )
+
+        self.assertEqual(str(supply), supply.name)

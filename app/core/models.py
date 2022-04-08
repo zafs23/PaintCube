@@ -59,4 +59,14 @@ class Category(models.Model):
         return self.name
 
 
+class Supply(models.Model):
+    """Supply to be used in a recipe"""
+    name = models.CharField(max_length=255)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
+    )
+
+    def __str__(self):
+        return self.name
 # Create your models here.

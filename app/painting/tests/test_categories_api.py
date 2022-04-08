@@ -37,7 +37,7 @@ class PrivateCategoriesApiTests(TestCase):
         self.client = APIClient()
         self.client.force_authenticate(self.user)
 
-    def test_retrieve_categories(self):
+    def test_retrieve_categories_list(self):
         """Test retrieving category list is correct"""
         Category.objects.create(user=self.user, name='Watercolor')
         Category.objects.create(user=self.user, name='Acrylic')

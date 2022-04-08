@@ -7,10 +7,11 @@ from painting import views
 
 router = DefaultRouter()
 router.register('categories', views.CategoryViewSet)
+router.register('supplies', views.SupplyViewSet)
 
 
 app_name = 'painting'
 
-urlpatterns = [  # all urls will be added here
+urlpatterns = [  # all urls will be added here if we keep adding router
     path('', include(router.urls))
 ]

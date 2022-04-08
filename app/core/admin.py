@@ -33,4 +33,5 @@ class UserAdmin(BaseUserAdmin):  # extend baseuseradmin
 
 admin.site.register(models.User, UserAdmin)
 admin.site.register(models.Category)  # do not need the UserAdmin as we are
+admin.site.register(models.Supply)
 # using a basic model of read, update and delete here

@@ -2,7 +2,7 @@ from rest_framework import viewsets, mixins
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 
-from core.models import Category, Supply
+from core.models import Category, Supply, Painting
 
 from painting import serializers
 
@@ -40,5 +40,21 @@ class SupplyViewSet(BasePaintingAttrViewSet):
     # permission_classes = (IsAuthenticated,)
     queryset = Supply.objects.all()
     serializer_class = serializers.SupplySerializer
+
+
+class PaintingViewSet(viewsets.ModelViewSet):
+    """Manage painting in the databse"""
+    queryset = Painting.objects.all()
+    serializer_class = serializers.PaintingSerializer
+
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        """Return paintings for the current authenticated user only"""
+        return self.queryset.filter(user=self.request.user)
+        # we do no tneed .order_by('-id')
+
+
 # Create your views here.
 # going to use list model fuction from the rest rest_framework

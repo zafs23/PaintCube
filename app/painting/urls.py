@@ -8,6 +8,7 @@ from painting import views
 router = DefaultRouter()
 router.register('categories', views.CategoryViewSet)
 router.register('supplies', views.SupplyViewSet)
+router.register('paintings', views.PaintingViewSet)
 
 
 app_name = 'painting'

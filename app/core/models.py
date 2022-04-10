@@ -49,7 +49,7 @@ class Category(models.Model):
     """Category of a painting """
     name = models.CharField(max_length=255)
     user = models.ForeignKey(  # foreign key of the user object which could be
-        # done by refereing to the user but we here we used the better approach
+        # done by refereing to the user
         settings.AUTH_USER_MODEL,  # used from the settings imported on top
         on_delete=models.CASCADE,  # if the user is deleted the category will
         # be deleted as well
@@ -69,4 +69,28 @@ class Supply(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Painting(models.Model):
+    """Painting object"""
+    user = models.ForeignKey(  # one painting can belong to only one user
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
+    )
+    # every field will be a column in the data table
+    title = models.CharField(max_length=255)
+    painting_create_date = models.DateField()
+    # price = models.DecimalField(max_digits=5, decimal_places=2)
+    link_to_instragram = models.CharField(max_length=255, blank=True)
+    # link field is optional, in a char field user can enter a null value,
+    # thus blank= ture will set the link as a blank string
+    category = models.ManyToManyField('Category')
+    supply = models.ManyToManyField('Supply')
+    # the models are passed as strings , not by class because in that case
+    # the classes has to be in order which will not be handy when we have
+    # many classes
+    # many-to-many represets the many-to-many replationship in between models
+
+    def __str__(self):
+        return self.title
 # Create your models here.

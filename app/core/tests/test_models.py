@@ -4,6 +4,7 @@ from django.test import TestCase
 from django.contrib.auth import get_user_model
 
 from core import models
+import datetime
 
 
 # helper fucntion to test the user model
@@ -72,3 +73,14 @@ class ModelTests(TestCase):
         )
 
         self.assertEqual(str(supply), supply.name)
+
+    def test_painting_str(self):
+        """Test the paintings string representation"""
+        painting = models.Painting.objects.create(
+            user=sample_user(),
+            title='Stormy Night',
+            painting_create_date=datetime.date(2014, 6, 11)
+            # do not put zero in date as it is counted as octals
+        )
+
+        self.assertEqual(str(painting), painting.title)

@@ -41,3 +41,11 @@ class PaintingSerializer(serializers.ModelSerializer):
         fields = ('id', 'title', 'painting_create_date', 'link_to_instragram',
                   'category', 'supply')
         read_only_fields = ('id',)  # the id will be read only field
+
+
+class PaintingDetailSerializer(PaintingSerializer):
+    """Serialize a painting in detail using the base painting serializer"""
+    category = CategorySerializer(many=True, read_only=True)
+    supply = SupplySerializer(many=True, read_only=True)
+    # using the category and supply serializer we can show the name and id of
+    # these objects

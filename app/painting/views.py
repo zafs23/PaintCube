@@ -1,4 +1,4 @@
-from rest_framework import viewsets, mixins
+from rest_framework import viewsets, mixins, status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 
@@ -44,8 +44,9 @@ class SupplyViewSet(BasePaintingAttrViewSet):
 
 class PaintingViewSet(viewsets.ModelViewSet):
     """Manage painting in the databse"""
-    queryset = Painting.objects.all()
     serializer_class = serializers.PaintingSerializer
+    queryset = Painting.objects.all()
+
 
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
@@ -55,6 +56,14 @@ class PaintingViewSet(viewsets.ModelViewSet):
         return self.queryset.filter(user=self.request.user)
         # we do no tneed .order_by('-id')
 
+    #override a serializer class after retrueve action and return detail
+    # thus when the retrieve is called we are going to return the detail
+    # serializer
+    def get_serializer_class(self):
+        """Return appropriate serializer class"""
+        if self.action == 'retrieve':
+            return serializers.PaintingDetailSerializer
 
+        return self.serializer_class
 # Create your views here.
 # going to use list model fuction from the rest rest_framework

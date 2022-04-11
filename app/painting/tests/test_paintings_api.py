@@ -5,13 +5,19 @@ from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from core.models import Painting
+from core.models import Painting, Category, Supply
 
-from painting.serializers import PaintingSerializer
+from painting.serializers import PaintingSerializer, PaintingDetailSerializer
 
 
 PAINTINGS_URL = reverse('painting:painting-list')
+# need another URL whiche the id for the painting that is to be retrieved
+# url for all the paintings: /api/painting/paintings
+# url for the detailed painting : /api/painting/paintings/id (id is an int)
 
+def detail_painting_url(painting_id):
+    """ return the detailed painting id"""
+    return reverse('painting:painting-detail', args=[painting_id])
 
 def sample_painting(user, **default_dic):
     """Create and return a sample painting"""
@@ -22,6 +28,15 @@ def sample_painting(user, **default_dic):
     defaults.update(default_dic)
 
     return Painting.objects.create(user=user, **defaults)
+
+def sample_category(user, name='Sample category'):
+    """Create and return a sample category object"""
+    return Category.objects.create(user=user, name=name)
+
+def sample_supply(user, name='Sample supply'):
+    """Create and return a sample supply object"""
+    return Supply.objects.create(user=user, name=name)
+#PaintingDetailSerializer
 
 
 class PublicPaintingsApiTests(TestCase):
@@ -48,8 +63,9 @@ class PrivatePaintingsApiTests(TestCase):
         self.client = APIClient()
         self.client.force_authenticate(self.user)
 
-    def test_retrieve_paintings_list(self):
-        """Test retrieving supply list is correct"""
+    def test_retrieve_paintings_list(self):  # a preview as will return the
+        # ids of the paintings
+        """Test retrieving painting is correct"""
         sample_painting(user=self.user)
         sample_painting(user=self.user)
 
@@ -83,3 +99,16 @@ class PrivatePaintingsApiTests(TestCase):
         # as we have mentioned just 1 supply it will return 1
         self.assertEqual(res.data, serializer.data)  # test correct
         # name
+
+    def test_painting_detail_view(self):
+        """test viewing a painting detail is correct"""
+        painting = sample_painting(user=self.user)
+        painting.category.add(sample_category(user=self.user))
+        painting.supply.add(sample_supply(user=self.user))
+
+        url = detail_painting_url(painting.id)  # gets the id of the sample painting
+        res = self.client.get(url)
+
+        serializer = PaintingDetailSerializer(painting) # only one painting
+        # detail will be returned thus we dont need (many = true) here.
+        self.assertEqual(res.data, serializer.data)

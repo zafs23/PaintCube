@@ -24,7 +24,7 @@ def detail_painting_url(painting_id):
 
 def sample_painting(user, **default_dic):
     """Create and return a sample painting"""
-    date = datetime.date(2014, 6, 11)
+    date = datetime.date(1995, 1, 1)
     defaults = {
         'title': 'Sample painting',
         'painting_create_date': date  # format yyyy-mm-dd
@@ -170,3 +170,40 @@ class PrivatePaintingsApiTests(TestCase):
         self.assertEqual(supplies.count(), 2)
         self.assertIn(supply1, supplies)
         self.assertIn(supply2, supplies)
+
+    def test_partial_update_painting(self):
+        """Test updating a painting object with patch"""
+        painting = sample_painting(user=self.user)
+        painting.categories.add(sample_category(user=self.user))
+        new_category = sample_category(user=self.user, name='Acrylic')
+
+        # payload
+        payload = {'title': 'Before Sunset', 'categories': [new_category.id]}
+        url = detail_painting_url(painting.id)
+        self.client.patch(url, payload)
+
+        # retrieve update and check
+        painting.refresh_from_db()
+        self.assertEqual(painting.title, payload['title'])
+        categories = painting.categories.all()
+        self.assertEqual(len(categories), 1)
+        self.assertIn(new_category, categories)
+
+    def test_full_update_painting(self):
+        """Test updating a painting with put"""
+        date = datetime.date(2014, 6, 11)
+        painting = sample_painting(user=self.user)
+        painting.categories.add(sample_category(user=self.user))
+        payload = {
+            'title': 'Before Sunset',
+            'painting_create_date': date
+        }
+        url = detail_painting_url(painting.id)
+        self.client.put(url, payload)
+
+        painting.refresh_from_db()
+        self.assertEqual(painting.title, payload['title'])
+        self.assertEqual(painting.painting_create_date,
+                         payload['painting_create_date'])
+        categories = painting.categories.all()
+        self.assertEqual(len(categories), 0)

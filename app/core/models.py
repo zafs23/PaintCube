@@ -1,7 +1,19 @@
+import uuid
+import os
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, \
                                         PermissionsMixin
 from django.conf import settings
+
+
+def painting_image_file_path(instance, filename):
+    """Generate file path for a painting image"""
+    ext = filename.split('.')[-1]  # strip the extention part of the filename
+    # then slice the list using [] and -1 return the last item
+    filename = f'{uuid.uuid4()}.{ext}'
+
+    # join two fields to make a valid path
+    return os.path.join('uploads/recipe/', filename)
 
 
 class UserManager(BaseUserManager):
@@ -90,6 +102,9 @@ class Painting(models.Model):
     # the classes has to be in order which will not be handy when we have
     # many classes
     # many-to-many represets the many-to-many replationship in between models
+    image = models.ImageField(null=True, upload_to=painting_image_file_path)
+    # we havent called the painting_image_file_path() function rather we are
+    # passing a reference
 
     def __str__(self):
         return self.title

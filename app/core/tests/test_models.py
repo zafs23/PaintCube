@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 from django.test import TestCase
 # import get user model helper fucntion
 # not recommended to use the get user model directly
@@ -84,3 +86,17 @@ class ModelTests(TestCase):
         )
 
         self.assertEqual(str(painting), painting.title)
+
+    @patch('uuid.uuid4')  # uuid4 function will generete unique uui
+    def test_painting_file_name_uuid(self, mock_uuid):
+        """Test that painting image is saved in the correct location"""
+        uuid = 'test-uuid'
+        mock_uuid.return_value = uuid
+        # uuid fucntion will return a file path
+        # none is the instance which we do not need
+        # the 'myimage.jpg' will be overriden by the returned file path
+        file_path = models.painting_image_file_path(None, 'myimage.jpg')
+
+        exp_path = f'uploads/recipe/{uuid}.jpg'  # expected path
+        # we have used literal string interpolation
+        self.assertEqual(file_path, exp_path)

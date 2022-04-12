@@ -80,12 +80,12 @@ class Painting(models.Model):
     # every field will be a column in the data table
     title = models.CharField(max_length=255)
     painting_create_date = models.DateField()
-    # price = models.DecimalField(max_digits=5, decimal_places=2)
-    link_to_instragram = models.CharField(max_length=255, blank=True)
     # link field is optional, in a char field user can enter a null value,
     # thus blank= ture will set the link as a blank string
-    category = models.ManyToManyField('Category')
-    supply = models.ManyToManyField('Supply')
+    link_to_instragram = models.CharField(max_length=255, blank=True)
+    # price = models.DecimalField(max_digits=5, decimal_places=2)
+    categories = models.ManyToManyField('Category')
+    supplies = models.ManyToManyField('Supply')
     # the models are passed as strings , not by class because in that case
     # the classes has to be in order which will not be handy when we have
     # many classes

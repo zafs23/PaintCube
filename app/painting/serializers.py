@@ -1,4 +1,4 @@
-from rest_framework import serializers
+from rest_framework import serializers, fields
 
 from core.models import Category, Supply, Painting
 
@@ -23,15 +23,16 @@ class SupplySerializer(serializers.ModelSerializer):
 
 class PaintingSerializer(serializers.ModelSerializer):
     """Serializer for Painting objects"""
+    painting_create_date = fields.DateField(input_formats=['%Y-%m-%d'])
     # we need to define primary key related fields within the fields
     # as category and supplies are not part of the serializer they are
     # refering to category and supply models
-    category = serializers.PrimaryKeyRelatedField(  # this will only include
+    categories = serializers.PrimaryKeyRelatedField(  # this will only include
         # the primary key (id) not the whole object
         many=True,
         queryset=Category.objects.all()
     )
-    supply = serializers.PrimaryKeyRelatedField(
+    supplies = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=Supply.objects.all()
     )
@@ -39,13 +40,13 @@ class PaintingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Painting
         fields = ('id', 'title', 'painting_create_date', 'link_to_instragram',
-                  'category', 'supply')
+                  'categories', 'supplies')
         read_only_fields = ('id',)  # the id will be read only field
 
 
 class PaintingDetailSerializer(PaintingSerializer):
     """Serialize a painting in detail using the base painting serializer"""
-    category = CategorySerializer(many=True, read_only=True)
-    supply = SupplySerializer(many=True, read_only=True)
+    categories = CategorySerializer(many=True, read_only=True)
+    supplies = SupplySerializer(many=True, read_only=True)
     # using the category and supply serializer we can show the name and id of
     # these objects

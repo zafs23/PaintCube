@@ -257,3 +257,48 @@ class PaintingImageUploadTests(TestCase):
         res = self.client.post(url, {'image': 'notimage'}, format='multipart')
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_filter_paintings_by_categories(self):
+        """Test returning paintings with specific categories"""
+        painting1 = sample_painting(user=self.user, title='Sunset Before')
+        painting2 = sample_painting(user=self.user, title='Sunset After')
+        category1 = sample_category(user=self.user, name='Watercolor')
+        category2 = sample_category(user=self.user, name='Acrylic')
+        painting1.categories.add(category1)
+        painting2.categories.add(category2)
+        painting3 = sample_painting(user=self.user, title='After Storm')
+
+        res = self.client.get(
+            PAINTINGS_URL,
+            {'categories': f'{category1.id},{category2.id}'}
+        )
+
+        serializer1 = PaintingSerializer(painting1)  # check if the categories
+        # are returned using the serializer
+        serializer2 = PaintingSerializer(painting2)
+        serializer3 = PaintingSerializer(painting3)
+        self.assertIn(serializer1.data, res.data)
+        self.assertIn(serializer2.data, res.data)
+        self.assertNotIn(serializer3.data, res.data)
+
+    def test_filter_recipes_by_supplies(self):
+        """Test returning paintings with specific supplies"""
+        painting1 = sample_painting(user=self.user, title='Sunset Before')
+        painting2 = sample_painting(user=self.user, title='Sunset after')
+        supply1 = sample_supply(user=self.user, name='Pen')
+        supply2 = sample_supply(user=self.user, name='Paper')
+        painting1.supplies.add(supply1)
+        painting2.supplies.add(supply2)
+        painting3 = sample_painting(user=self.user, title='After Storm')
+
+        res = self.client.get(
+            PAINTINGS_URL,
+            {'supplies': f'{supply1.id},{supply2.id}'}
+        )
+
+        serializer1 = PaintingSerializer(painting1)
+        serializer2 = PaintingSerializer(painting2)
+        serializer3 = PaintingSerializer(painting3)
+        self.assertIn(serializer1.data, res.data)
+        self.assertIn(serializer2.data, res.data)
+        self.assertNotIn(serializer3.data, res.data)

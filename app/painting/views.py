@@ -51,10 +51,33 @@ class PaintingViewSet(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
+    def _params_to_ints(self, qs):
+        """Convert a list of string IDs to a list of integers"""
+        # qs = '1,2,3'
+        # converted_string = ['1','2','3']
+        # returnd_list = [1, 2, 3]
+        return [int(str_id) for str_id in qs.split(',')]  # qs is the comma
+        # seperated list and we change the list items to integers
+
     def get_queryset(self):
         """Return paintings for the current authenticated user only"""
-        return self.queryset.filter(user=self.request.user)
-        # we do no tneed .order_by('-id')
+        # add filtering
+        # request has a query params in a dictionary
+        categories = self.request.query_params.get('categories')
+        supplies = self.request.query_params.get('supplies')
+        queryset = self.queryset  # get the queryset and the apply the filters
+        if categories:
+            category_ids = self._params_to_ints(categories)
+            queryset = queryset.filter(categories__id__in=category_ids)
+            # double underscore is convention for filtering foreign key objects
+            # __in is a function whihc returns all the category ids that is
+            # in the list that we provide
+        if supplies:
+            supply_ids = self._params_to_ints(supplies)
+            queryset = queryset.filter(supplies__id__in=supply_ids)
+
+        return queryset.filter(user=self.request.user)
+        # we do not need .order_by('-id')
 
     # override a serializer class after retrueve action and return detail
     # thus when the retrieve is called we are going to return the detail
@@ -74,9 +97,10 @@ class PaintingViewSet(viewsets.ModelViewSet):
 # Create your views here.
 # going to use list model fuction from the rest rest_framework
 
-    @action(methods=['POST'], detail=True, url_path='upload-image')
     # the actions could be POST, PUT or PATCH
     # detail URL
+
+    @action(methods=['POST'], detail=True, url_path='upload-image')
     def upload_image(self, request, pk=None):  # passed in with the URL as pk
         """Upload an image of a painting"""
         painting = self.get_object()

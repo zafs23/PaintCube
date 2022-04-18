@@ -50,3 +50,12 @@ class PaintingDetailSerializer(PaintingSerializer):
     supplies = SupplySerializer(many=True, read_only=True)
     # using the category and supply serializer we can show the name and id of
     # these objects
+
+
+class PaintingImageSerializer(serializers.ModelSerializer):
+    """Serializer for uploading images of the paintings"""
+
+    class Meta:
+        model = Painting
+        fields = ('id', 'image')
+        read_only_fields = ('id',)

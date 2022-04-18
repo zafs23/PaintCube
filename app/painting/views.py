@@ -1,4 +1,6 @@
-from rest_framework import viewsets, mixins
+from rest_framework.decorators import action  # for custom actions
+from rest_framework.response import Response
+from rest_framework import viewsets, mixins, status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 
@@ -61,6 +63,8 @@ class PaintingViewSet(viewsets.ModelViewSet):
         """Return appropriate serializer class"""
         if self.action == 'retrieve':
             return serializers.PaintingDetailSerializer
+        elif self.action == 'upload_image':
+            return serializers.PaintingImageSerializer
 
         return self.serializer_class
 
@@ -69,3 +73,26 @@ class PaintingViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 # Create your views here.
 # going to use list model fuction from the rest rest_framework
+
+    @action(methods=['POST'], detail=True, url_path='upload-image')
+    # the actions could be POST, PUT or PATCH
+    # detail URL
+    def upload_image(self, request, pk=None):  # passed in with the URL as pk
+        """Upload an image of a painting"""
+        painting = self.get_object()
+        serializer = self.get_serializer(
+            painting,
+            data=request.data
+        )
+
+        if serializer.is_valid():  # check the serializer is valid
+            serializer.save()  # save on the painting model with updated data
+            return Response(
+                serializer.data,
+                status=status.HTTP_200_OK
+            )
+
+        return Response(  # if not valid return errors
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )

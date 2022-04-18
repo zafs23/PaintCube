@@ -1,3 +1,9 @@
+import tempfile
+import os
+
+from PIL import Image
+
+
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.test import TestCase
@@ -15,6 +21,11 @@ PAINTINGS_URL = reverse('painting:painting-list')
 # need another URL whiche the id for the painting that is to be retrieved
 # url for all the paintings: /api/painting/paintings
 # url for the detailed painting : /api/painting/paintings/id (id is an int)
+
+
+def image_upload_url(painting_id):
+    """Return URL for painting image upload"""
+    return reverse('painting:painting-upload-image', args=[painting_id])
 
 
 def detail_painting_url(painting_id):
@@ -207,3 +218,42 @@ class PrivatePaintingsApiTests(TestCase):
                          payload['painting_create_date'])
         categories = painting.categories.all()
         self.assertEqual(len(categories), 0)
+
+
+class PaintingImageUploadTests(TestCase):
+
+    def setUp(self):  # before the test runs
+        self.client = APIClient()
+        self.user = get_user_model().objects.create_user(
+            'user@sajiazafreen.com',
+            'testpass'
+        )
+        self.client.force_authenticate(self.user)
+        self.painting = sample_painting(user=self.user)
+
+    def tearDown(self):  # after the test runs, removing all the test files
+        self.painting.image.delete()
+
+    def test_upload_image_to_painting(self):
+        """Test uploading an email to painting"""
+        url = image_upload_url(self.painting.id)
+        with tempfile.NamedTemporaryFile(suffix='.jpg') as ntf:
+            # creates a names temporary file in the system at a random location
+            # in forward/temp folder and suffix is the extention
+            img = Image.new('RGB', (10, 10))  # 10/10 dimension
+            img.save(ntf, format='JPEG')  # ntf is the reference
+            ntf.seek(0)  # seeks the files, this is how python reads by
+            # back to the beginning of the file
+            res = self.client.post(url, {'image': ntf}, format='multipart')
+
+        self.painting.refresh_from_db()
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn('image', res.data)
+        self.assertTrue(os.path.exists(self.painting.image.path))
+
+    def test_upload_image_bad_request(self):
+        """Test uploading an invalid image"""
+        url = image_upload_url(self.painting.id)
+        res = self.client.post(url, {'image': 'notimage'}, format='multipart')
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)

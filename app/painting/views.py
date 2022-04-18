@@ -21,7 +21,25 @@ class BasePaintingAttrViewSet(viewsets.GenericViewSet,
 
     def get_queryset(self):
         """Return objects for the current authenticated user only"""
-        return self.queryset.filter(user=self.request.user).order_by('-name')
+        # to add the filtering for geting categories and supplies
+        # depending on the painting we have to change the filter here
+        assigned_only = bool(
+            int(self.request.query_params.get('assigned_only', 0))
+        )  # convert query parameter to integers and then to a boolean
+        # we have assign a value here otherwise it'll convert it to a none type
+        # the assigned only value will be 0 or 1
+        # the query get parameter cant detect string or int
+        # here assigned 0 is a default value, if passed it will be override
+        queryset = self.queryset
+        if assigned_only:
+            queryset = queryset.filter(painting__isnull=False)
+
+        return queryset.filter(
+            user=self.request.user
+            ).order_by('-name').distinct()
+        # here we have to add distinct in the end otherwise django will return
+        # duplicate items
+        # return self.queryset.filter(user=self.request.user).order_by('-name')
 
     def perform_create(self, serializer):
         """Create a new object (category/supply)"""
@@ -66,6 +84,8 @@ class PaintingViewSet(viewsets.ModelViewSet):
         categories = self.request.query_params.get('categories')
         supplies = self.request.query_params.get('supplies')
         queryset = self.queryset  # get the queryset and the apply the filters
+        # this filter helps to get painting depending on the categories and
+        # supplies
         if categories:
             category_ids = self._params_to_ints(categories)
             queryset = queryset.filter(categories__id__in=category_ids)

@@ -5,7 +5,8 @@ from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from core.models import Category
+from core.models import Category, Painting
+import datetime
 
 from painting.serializers import CategorySerializer
 
@@ -86,3 +87,46 @@ class PrivateCategoriesApiTests(TestCase):
         res = self.client.post(CATEGORIES_URL, payload)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_retrieve_categories_assigned_to_paintings(self):
+        """Test filtering categories which are assigned to paintings"""
+        category1 = Category.objects.create(
+                    user=self.user, name='Sample category1')
+        category2 = Category.objects.create(
+                    user=self.user, name='Sample category2')
+        painting = Painting.objects.create(
+            title='Sample Painting',
+            painting_create_date=datetime.date(2014, 6, 11),
+            user=self.user
+        )
+        painting.categories.add(category1)
+
+        res = self.client.get(CATEGORIES_URL, {'assigned_only': 1})
+
+        serializer1 = CategorySerializer(category1)
+        serializer2 = CategorySerializer(category2)
+        self.assertIn(serializer1.data, res.data)
+        self.assertNotIn(serializer2.data, res.data)
+
+        # we have to make sure distinct item is returned for every query
+        # because Django returns each item assigned seperately
+    def test_retrieve_categories_assigned_unique(self):
+        """Test filtering categories by assigned returns unique items"""
+        category = Category.objects.create(user=self.user, name='Watercolor')
+        Category.objects.create(user=self.user, name='Acrylic')
+        painting1 = Painting.objects.create(
+            title='Sunset',
+            painting_create_date=datetime.date(2014, 6, 11),
+            user=self.user
+        )
+        painting1.categories.add(category)
+        painting2 = Painting.objects.create(
+            title='Stormy night',
+            painting_create_date=datetime.date(2014, 6, 11),
+            user=self.user
+        )
+        painting2.categories.add(category)
+
+        res = self.client.get(CATEGORIES_URL, {'assigned_only': 1})
+
+        self.assertEqual(len(res.data), 1)

@@ -6,7 +6,8 @@ from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from core.models import Supply
+from core.models import Supply, Painting
+import datetime
 
 from painting.serializers import SupplySerializer
 
@@ -88,3 +89,44 @@ class PrivateSuppliesApiTests(TestCase):
         res = self.client.post(SUPPLIES_URL, payload)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_retrieve_supplies_assigned_to_paintings(self):
+        """Test filtering supplies which are assigned to paintings"""
+        supply1 = Supply.objects.create(user=self.user, name='Sample supply1')
+        supply2 = Supply.objects.create(user=self.user, name='Sample supply2')
+        painting = Painting.objects.create(
+            title='Sample Painting',
+            painting_create_date=datetime.date(2014, 6, 11),
+            user=self.user
+        )
+        painting.supplies.add(supply1)
+
+        res = self.client.get(SUPPLIES_URL, {'assigned_only': 1})
+
+        serializer1 = SupplySerializer(supply1)
+        serializer2 = SupplySerializer(supply2)
+        self.assertIn(serializer1.data, res.data)
+        self.assertNotIn(serializer2.data, res.data)
+
+        # we have to make sure distinct item is returned for every query
+        # because Django returns each item assigned seperately
+    def test_retrieve_supplies_assigned_unique(self):
+        """Test filtering supplies by assigned returns unique items"""
+        supply = Supply.objects.create(user=self.user, name='A4 Paper')
+        Supply.objects.create(user=self.user, name='Pen')
+        painting1 = Painting.objects.create(
+            title='Sunset',
+            painting_create_date=datetime.date(2014, 6, 11),
+            user=self.user
+        )
+        painting1.supplies.add(supply)
+        painting2 = Painting.objects.create(
+            title='Stormy night',
+            painting_create_date=datetime.date(2014, 6, 11),
+            user=self.user
+        )
+        painting2.supplies.add(supply)
+
+        res = self.client.get(SUPPLIES_URL, {'assigned_only': 1})
+
+        self.assertEqual(len(res.data), 1)

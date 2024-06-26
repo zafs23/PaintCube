@@ -5,7 +5,7 @@ ENV PYTHONUNBUFFERED 1
 
 COPY ./requirements.txt /requirements.txt
 # need to add some dependencies to install the package for
-# django to communicate with postgres
+# django to communicate with postgress
 # for Pillow added jpeg-dev
 RUN apk add --update --no-cache postgresql-client jpeg-dev
 # apk is the name of the package manager that comes with Alpine, other is
